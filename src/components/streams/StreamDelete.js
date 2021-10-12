@@ -1,7 +1,12 @@
 import React, { Fragment, Component } from 'react';
+import { connect } from 'react-redux';
 import Modal from '../Modal';
 import history from '../../history';
+import { fetchStream } from '../../actions';
 class StreamDelete extends Component {
+  componentDidMount() {
+    this.props.fetchStream(this.props.match.params.id);
+  }
   renderActions() {
     return (
       <Fragment>
@@ -11,19 +16,31 @@ class StreamDelete extends Component {
     );
   }
 
+  renderContent() {
+    if (!this.props.stream) {
+      return 'Are you sure you want to delete this stream?';
+    }
+    return `Are you sure you want to delete with the title: ${this.props.stream.title}`;
+  }
+
   render() {
     return (
-      <div>
-        StreamDelete
+      <Fragment>
         <Modal
           title="Delete Stream"
-          content="Are you sure you want to delete this stream?"
+          content={this.renderContent()}
           actions={this.renderActions()}
           onDismiss={() => history.push('/')}
         />
-      </div>
+      </Fragment>
     );
   }
 }
 
-export default StreamDelete;
+const mapStateToProps = (state, ownProps) => {
+  return {
+    stream: state.streams[ownProps.match.params.id],
+  };
+};
+
+export default connect(mapStateToProps, { fetchStream })(StreamDelete);
